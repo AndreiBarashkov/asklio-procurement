@@ -2,10 +2,12 @@ package com.asklio.procurement.controller;
 
 import com.asklio.procurement.dto.IntakeRequestDTO;
 import com.asklio.procurement.dto.IntakeResponseDTO;
-import com.asklio.procurement.entity.Intake;
 import com.asklio.procurement.entity.IntakeStatus;
 import com.asklio.procurement.service.IntakeService;
+import com.asklio.procurement.service.OpenAIExtractionService;
+import com.asklio.procurement.service.PdfExtractionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -16,19 +18,23 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/intake")
 public class IntakeController {
 
     private final IntakeService intakeService;
+    private final PdfExtractionService pdfExtractionService;
+    private final OpenAIExtractionService openAiExtractionService;
 
     @Autowired
-    public IntakeController(IntakeService intakeService) {
+    public IntakeController(IntakeService intakeService, PdfExtractionService pdfExtractionService, OpenAIExtractionService openAiExtractionService) {
         this.intakeService = intakeService;
+        this.pdfExtractionService = pdfExtractionService;
+        this.openAiExtractionService = openAiExtractionService;
     }
 
     @GetMapping
@@ -72,5 +78,16 @@ public class IntakeController {
         Boolean result = intakeService.submitIntake(id);
 
         return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/import-pdf")
+    public ResponseEntity<IntakeRequestDTO> importIntakeFromPdf(@RequestParam("file") MultipartFile file) {
+        try {
+            String text = pdfExtractionService.extractText(file);
+            IntakeRequestDTO intake = openAiExtractionService.extractIntakeFromText(text);
+            return ResponseEntity.ok(intake);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 }
