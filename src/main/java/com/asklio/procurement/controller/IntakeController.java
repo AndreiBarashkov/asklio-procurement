@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/intake")
@@ -65,8 +66,11 @@ public class IntakeController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/submit")
-    public ResponseEntity<String> submit() {
-        return ResponseEntity.ok("Hello, World!"); // TODO make intake status `Closed` if it is valid. Else return an error with description
+    @PostMapping("/{id}/submit")
+    public ResponseEntity<?> submit(@PathVariable String id) {
+
+        Boolean result = intakeService.submitIntake(id);
+
+        return ResponseEntity.ok(result);
     }
 }

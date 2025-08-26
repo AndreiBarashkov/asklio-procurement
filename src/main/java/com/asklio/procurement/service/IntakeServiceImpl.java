@@ -2,7 +2,6 @@ package com.asklio.procurement.service;
 
 import com.asklio.procurement.dto.IntakeRequestDTO;
 import com.asklio.procurement.dto.IntakeResponseDTO;
-import com.asklio.procurement.dto.OrderRequestDTO;
 import com.asklio.procurement.dto.OrderResponseDTO;
 import com.asklio.procurement.entity.Intake;
 import com.asklio.procurement.entity.IntakeStatus;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -115,6 +115,22 @@ public class IntakeServiceImpl implements IntakeService {
         return Optional.of(toResponse(updated));
     }
 
+    @Transactional
+    @Override
+    public Boolean submitIntake(String id) {
+        Optional<Intake> optional = intakeRepository.findById(UUID.fromString(id));
+        if (optional.isEmpty()) return false;
+
+        Intake intake = optional.get();
+
+        // Validate required fields
+        boolean isInvalid = isInvalid(intake);
+        if (!isInvalid) {
+            intake.setStatus(IntakeStatus.Closed);
+        }
+        return !isInvalid;
+    }
+
     @Override
     public Optional<IntakeResponseDTO> getIntakeById(String id) {
         return intakeRepository.findById(UUID.fromString(id)).map(this::toResponse);
@@ -143,6 +159,22 @@ public class IntakeServiceImpl implements IntakeService {
         return dto.orders().stream()
                 .map(order -> order.amount().multiply(order.unitPrice()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    // validation for submitted intake request
+    // TODO: move to utils
+    private boolean isInvalid(Intake intake) {
+        return intake.getRequestorName() == null || intake.getRequestorName().isBlank()
+                || intake.getTitle() == null || intake.getTitle().isBlank()
+                || intake.getVatId() == null || intake.getVatId().isBlank()
+                || intake.getVendorName() == null || intake.getVendorName().isBlank()
+                || intake.getOrders() == null || intake.getOrders().isEmpty()
+                || intake.getOrders().stream().anyMatch(order ->
+                order.getDescription() == null || order.getDescription().isBlank()
+                        || order.getAmount() == null || Objects.equals(order.getAmount(), BigDecimal.ZERO)
+                        || order.getUnitPrice() == null || Objects.equals(order.getUnitPrice(), BigDecimal.ZERO)
+                || order.getUnit() == null || order.getUnit().isBlank()
+        );
     }
 
     // Helper to map Intake → IntakeResponseDTO
