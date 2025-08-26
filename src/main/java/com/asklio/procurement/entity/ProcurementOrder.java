@@ -1,19 +1,23 @@
 package com.asklio.procurement.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Entity
-public class Order {
+@Table(name = "procurement_order")
+public class ProcurementOrder {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String order_id;
+    @Column(name = "id", nullable = false, updatable = false)
+    private UUID id;
     private String description;
     private BigDecimal unitPrice;
     private BigDecimal amount;
@@ -21,49 +25,54 @@ public class Order {
     private BigDecimal totalPrice;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "intake_id", nullable = false)
     private Intake intake;
 
     // ==== Builder ====
     public static class Builder {
-        private final Order order;
+        private final ProcurementOrder procurementOrder;
 
         public Builder() {
-            this.order = new Order();
+            this.procurementOrder = new ProcurementOrder();
+        }
+
+        public ProcurementOrder.Builder id(UUID id) {
+            procurementOrder.id = id;
+            return this;
         }
 
         public Builder positionDescription(String description) {
-            order.description = description;
+            procurementOrder.description = description;
             return this;
         }
 
         public Builder unitPrice(BigDecimal unitPrice) {
-            order.unitPrice = unitPrice;
+            procurementOrder.unitPrice = unitPrice;
             return this;
         }
 
         public Builder amount(BigDecimal amount) {
-            order.amount = amount;
+            procurementOrder.amount = amount;
             return this;
         }
 
         public Builder unit(String unit) {
-            order.unit = unit;
+            procurementOrder.unit = unit;
             return this;
         }
 
         public Builder totalPrice(BigDecimal totalPrice) {
-            order.totalPrice = totalPrice;
+            procurementOrder.totalPrice = totalPrice;
             return this;
         }
 
         public Builder intake(Intake intake) {
-            order.intake = intake;
+            procurementOrder.intake = intake;
             return this;
         }
 
-        public Order build() {
-            return order;
+        public ProcurementOrder build() {
+            return procurementOrder;
         }
     }
 
@@ -71,12 +80,12 @@ public class Order {
         return new Builder();
     }
 
-    public String getOrder_id() {
-        return order_id;
+    public UUID getId() {
+        return id;
     }
 
-    public void setOrder_id(String order_id) {
-        this.order_id = order_id;
+    public void setOrder_id(UUID id) {
+        this.id = id;
     }
 
     public String getDescription() {

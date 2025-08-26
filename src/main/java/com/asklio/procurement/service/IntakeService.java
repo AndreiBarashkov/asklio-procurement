@@ -10,6 +10,7 @@ import java.util.Optional;
 public interface IntakeService {
     IntakeResponseDTO createIntake(IntakeRequestDTO intakeDTO);
     Optional<IntakeResponseDTO> getIntakeById(String id);
+    Optional<IntakeResponseDTO> updateIntake(String id, IntakeRequestDTO intakeRequestDTO);
     List<IntakeResponseDTO> getAllIntakes();
     boolean updateStatus(String id, IntakeStatus newStatus);
 }

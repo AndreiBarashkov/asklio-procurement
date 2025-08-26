@@ -1,29 +1,29 @@
 package com.asklio.procurement.entity;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 public class Intake {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @Column(name = "id", nullable = false, updatable = false)
+    private UUID id;
     private String requestorName;
     private String title;
     private String vendorName;
     private String vatId;
     private String commodityGroup; // TODO: check if it needs to be an enum (yes, but not enum. It should be saved in DB according to Readme)
     @OneToMany(mappedBy = "intake", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Order> orders;
+    private List<ProcurementOrder> procurementOrders;
     private BigDecimal totalCost;
     private String department; // TODO: check (this is department of requestor, so probably String)
     @Enumerated(EnumType.STRING)
@@ -38,7 +38,7 @@ public class Intake {
             this.intake = new Intake();
         }
 
-        public Builder id(String id) {
+        public Builder id(UUID id) {
             intake.id = id;
             return this;
         }
@@ -83,8 +83,8 @@ public class Intake {
             return this;
         }
 
-        public Builder orders(List<Order> orders) {
-            intake.orders = orders;
+        public Builder orders(List<ProcurementOrder> procurementOrders) {
+            intake.procurementOrders = procurementOrders;
             return this;
         }
 
@@ -98,11 +98,11 @@ public class Intake {
     }
 
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -146,12 +146,12 @@ public class Intake {
         this.commodityGroup = commodityGroup;
     }
 
-    public List<Order> getOrders() {
-        return orders;
+    public List<ProcurementOrder> getOrders() {
+        return procurementOrders;
     }
 
-    public void setOrders(List<Order> orders) {
-        this.orders = orders;
+    public void setOrders(List<ProcurementOrder> procurementOrders) {
+        this.procurementOrders = procurementOrders;
     }
 
     public BigDecimal getTotalCost() {

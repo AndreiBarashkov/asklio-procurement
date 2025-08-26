@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -55,7 +56,16 @@ public class IntakeController {
         return updated ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
-    @PostMapping
+    @PutMapping("/{id}")
+    public ResponseEntity<IntakeResponseDTO> updateIntake(
+            @PathVariable String id,
+            @RequestBody IntakeRequestDTO intakeRequestDTO) {
+        return intakeService.updateIntake(id, intakeRequestDTO)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/submit")
     public ResponseEntity<String> submit() {
         return ResponseEntity.ok("Hello, World!"); // TODO make intake status `Closed` if it is valid. Else return an error with description
     }
